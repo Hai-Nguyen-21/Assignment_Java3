@@ -19,7 +19,11 @@ import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -170,46 +174,6 @@ public class ServiceDiemSV implements IServiceDiem {
     }
 
     @Override
-    public void writeMark(DefaultTableModel table) {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.showSaveDialog(null);
-        File saveFile = fileChooser.getSelectedFile();
-
-        if (saveFile != null) {
-            saveFile = new File(saveFile.toString() + ".xlsx");
-            Workbook workbook = new XSSFWorkbook();
-            Sheet sheet = workbook.createSheet("Sheet1");
-
-            Row rowCol = sheet.createRow(0);
-            for (int i = 0; i < table.getColumnCount(); i++) {
-                Cell cell = rowCol.createCell(i);
-                cell.setCellValue(table.getColumnName(i));
-            }
-
-            for (int i = 0; i < table.getRowCount(); i++) {
-                Row row = sheet.createRow(i);
-                for (int j = 0; j < table.getColumnCount(); j++) {
-                    Cell cell = row.createCell(j);
-                    if (table.getValueAt(i, j) != null) {
-                        cell.setCellValue(table.getValueAt(i, j).toString());
-                    }
-                }
-            }
-
-            try {
-                FileOutputStream fos = new FileOutputStream(new File(saveFile.toString()));
-                fos.close();
-                workbook.close();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            JOptionPane.showMessageDialog(null, "WRITE INTO EXCEL FAILED");
-        }
-    }
-
-    @Override
     public List<DiemSinhVien> getAllDiemSinhVien() {
         String query = "SELECT A.HOTEN, B.MASV, B.DTOAN, B.DVAN, B.DANH \n"
                 + "FROM SINHVIEN A JOIN DIEM B ON A.MASV = B.MASV";
@@ -242,4 +206,118 @@ public class ServiceDiemSV implements IServiceDiem {
         }
         return list;
     }
+    
+    @Override
+    public void writeMark(List<DiemSinhVien> list, String excelPath){
+        try {
+            Workbook workbook = getWorkBook(excelPath);
+            Sheet sheet = workbook.createSheet("List Điểm");
+            
+            int rowNum = 0;
+            Cell cell;
+            Row row;
+            
+            CellStyle cellStyle = createCellStyleForTitle((XSSFWorkbook) workbook);
+            
+            row = sheet.createRow(rowNum);
+            
+            // idStu
+            cell = row.createCell(0, CellType.STRING);
+            cell.setCellValue("ID");
+            cell.setCellStyle(cellStyle);
+            
+            // nameStu
+            cell = row.createCell(1, CellType.STRING);
+            cell.setCellValue("NAME");
+            cell.setCellStyle(cellStyle);
+            
+            // mathsStu
+            cell = row.createCell(2, CellType.STRING);
+            cell.setCellValue("MATHS");
+            cell.setCellStyle(cellStyle);
+            
+            // litStu
+            cell = row.createCell(3, CellType.STRING);
+            cell.setCellValue("LIT");
+            cell.setCellStyle(cellStyle);
+            
+            // engStu
+            cell = row.createCell(4, CellType.STRING);
+            cell.setCellValue("ENG");
+            cell.setCellStyle(cellStyle);
+            
+            // avgStu
+            cell = row.createCell(5, CellType.STRING);
+            cell.setCellValue("AVG");
+            cell.setCellStyle(cellStyle);
+            
+            // rankStu
+            cell = row.createCell(6, CellType.STRING);
+            cell.setCellValue("RANK");
+            cell.setCellStyle(cellStyle);
+            
+            // data 
+            for (DiemSinhVien o : list) {
+                rowNum++;
+                row = sheet.createRow(rowNum);
+                
+                // id
+                cell = row.createCell(0, CellType.STRING);
+                cell.setCellValue(o.getIdSV());
+                
+                // name
+                cell = row.createCell(1, CellType.STRING);
+                cell.setCellValue(o.getNameSV());
+                
+                // maths
+                cell = row.createCell(2, CellType.STRING);
+                cell.setCellValue(o.getMarkToan());
+                
+                // lit
+                cell = row.createCell(3, CellType.STRING);
+                cell.setCellValue(o.getMarkVan());
+                
+                // eng
+                cell = row.createCell(4, CellType.STRING);
+                cell.setCellValue(o.getMarkAnh());
+                
+                // avg
+                cell = row.createCell(5, CellType.STRING);
+                cell.setCellValue(o.getAVG());
+                
+                // rank
+                cell = row.createCell(6, CellType.STRING);
+                cell.setCellValue(o.getRank());
+            }
+            
+            File file = new File(excelPath);
+            FileOutputStream fos = new FileOutputStream(file);
+            workbook.write(fos);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public CellStyle createCellStyleForTitle(XSSFWorkbook workbook){
+        Font font = workbook.createFont();
+        font.setBold(true);
+        CellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setFont(font);
+        return cellStyle;
+    }
+    
+    @Override
+    public Workbook getWorkBook(String excelPath) {
+        Workbook workbook = null;
+        if (excelPath.endsWith("xlsx")) {
+            workbook = new XSSFWorkbook();
+        } else if (excelPath.endsWith("xls")) {
+            workbook = new HSSFWorkbook();
+        } else {
+            throw new IllegalAccessError();
+        }
+        return workbook;
+    }
+
 }

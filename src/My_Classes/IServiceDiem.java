@@ -8,6 +8,9 @@ package My_Classes;
 import java.sql.SQLException;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  *
@@ -24,7 +27,11 @@ public interface IServiceDiem {
     
     public List<DiemSinhVien> findTop5();
     
-    public void writeMark(DefaultTableModel table);
-    
     public List<DiemSinhVien> getAllDiemSinhVien();
+    
+    public void writeMark(List<DiemSinhVien> list, String excelPath);
+    
+    public CellStyle createCellStyleForTitle(XSSFWorkbook workbook);
+    
+    public Workbook getWorkBook(String excelPath); 
 }

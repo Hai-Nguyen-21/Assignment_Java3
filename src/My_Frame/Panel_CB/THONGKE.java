@@ -10,6 +10,7 @@ import My_Classes.IServiceDiem;
 import My_Classes.IServiceSV;
 import My_Classes.ServiceDiemSV;
 import My_Classes.ServiceSV;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
@@ -383,9 +384,11 @@ public class THONGKE extends javax.swing.JPanel {
 
     private void btn_xuatFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_xuatFileActionPerformed
         // TODO add your handling code here:
-        table = (DefaultTableModel) tbl_top5.getModel();
-        dao.writeMark(table);
-        JOptionPane.showMessageDialog(this, "WRITE DATA INTO EXCEL SUCCESSFUL");
+        list = dao.getAllDiemSinhVien();
+        String excelPath = "BANGDIEM.xlsx";
+        dao.writeMark(list, excelPath);
+        
+        JOptionPane.showMessageDialog(this, "WRITE INTO EXCEL SUCCESSFUL");
     }//GEN-LAST:event_btn_xuatFileActionPerformed
 
 
